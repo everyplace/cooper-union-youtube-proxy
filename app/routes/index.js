@@ -16,7 +16,7 @@ exports.json = function(req, res, next) {
 
 exports.youtube_search = function(req, res) {
   var opts = {
-    maxResults: 10,
+    maxResults: 15,
     startIndex: 1
   };
 
