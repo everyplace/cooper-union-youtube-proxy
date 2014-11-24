@@ -1,9 +1,8 @@
 var request = require('request')
-  , ig = require('instagram-node').instagram();
-
+  , youtube = require('youtube-search');
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Cooper Union Instagram Proxy' });
+  res.render('index', { title: 'Cooper Union Youtube Proxy' });
 };
 
 exports.json = function(req, res, next) {
@@ -15,65 +14,13 @@ exports.json = function(req, res, next) {
   next();
 };
 
-exports.instagram_search = function(req, res) {
+exports.youtube_search = function(req, res) {
+  var opts = {
+    maxResults: 10,
+    startIndex: 1
+  };
 
-  ig.use({ client_id: process.env.CLIENT_ID, client_secret: process.env.CLIENT_SECRET});
-  ig.tag_media_recent(req.params.search, function(err, medias, pagination, remaining, limit) {
-
-    res.end(JSON.stringify(medias));
-  });
-
-
-};
-
-exports.instagram_location = function(req, res) {
-  ig.use({ client_id: process.env.CLIENT_ID, client_secret: process.env.CLIENT_SECRET});
-
-  ig.location_search({ lat: parseFloat(req.params.lat), lng: parseFloat(req.params.long) }, function(err, result, remaining, limit) {
-
-    var resultCache = [];
-    for(i in result) {
-      ig.location_media_recent(result[i].id, {min_timestamp:1388534400}, function(err, result, pagination, remaining, limit) {
-        // console.log(err, result);
-        for(j in result) {
-          resultCache.push(result[j]);
-        }
-
-        if(i = result.length -1 ){
-          res.end(JSON.stringify(resultCache));
-        }
-      });
-
-    }
-
-  });
-
-};
-
-
-exports.instagram_user_search = function(req, res) {
-  ig.use({ client_id: process.env.CLIENT_ID, client_secret: process.env.CLIENT_SECRET});
-  ig.user_search(req.params.username, function(err, users, remaining, limit) {
-
-    res.end(JSON.stringify(users));
+  youtube(req.params.query, opts, function(err, results) {
+    res.end(JSON.stringify(results));
   });
 };
-
-exports.instagram_user_info = function(req, res) {
-  ig.use({ client_id: process.env.CLIENT_ID, client_secret: process.env.CLIENT_SECRET});
-  ig.user(req.params.username, function(err, result, remaining, limit) {
-
-    res.end(JSON.stringify(result));
-  });
-};
-
-exports.instagram_tag_media_recent = function(req, res) {
-  ig.use({ client_id: process.env.CLIENT_ID, client_secret: process.env.CLIENT_SECRET});
-  var count = (req.query.count && (req.query.count <= 100)) ? req.query.count : 15;
-  ig.tag_media_recent(req.params.tag, {count:count}, function(err, medias, pagination, remaining, limit) {
-
-    res.end(JSON.stringify(medias));
-  });
-};
-
-// ig.tag_media_recent('tag', [options,] function(err, medias, pagination, remaining, limit) {});
